@@ -1,3 +1,4 @@
+from django.db.models.query_utils import RegisterLookupMixin
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.http import HttpResponse
@@ -75,7 +76,7 @@ def home(request):
 
 
 
-    topics = Topic.objects.all()
+    topics = Topic.objects.all()[0:3]
     room_count = rooms.count()
     room_messages = Message.objects.filter(Q(room__topic__name__icontains=q)).order_by('-created')
 
@@ -190,3 +191,19 @@ def update_user(request):
 
     context = {'form': form}
     return render(request, 'base/update_user.html', context)
+
+def mobile_view_topics(request):
+
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    
+    topics = Topic.objects.filter(name__icontains=q)
+    context = {'topics': topics}
+
+    return render(request, 'base/topics.html', context)
+
+def mobile_view_activity(request):
+    room_messages = Message.objects.all()
+
+    context = {'room_messages': room_messages}
+
+    return render(request, 'base/activity.html', context)
